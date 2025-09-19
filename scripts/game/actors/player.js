@@ -185,6 +185,11 @@ class Hero {
             console.log('Меч подобран! Сила атаки увеличена.');
             this.pickUpSword();
             this.maze.tiles[y][x] = 0;
+
+            let inventory = document.getElementsByClassName('inventory')[0];
+            let tile = document.createElement('div');
+            tile.classList.add('tileSW');
+            inventory.appendChild(tile);
         }
     }
 
