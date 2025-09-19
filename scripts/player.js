@@ -1,14 +1,12 @@
-// 'use strict';
-
-class Hero {
+class Hero extends EntityPlacer {
     constructor(maze) {
-        this.maze = maze;
+        super(maze);
         this.x = 0;
         this.y = 0;
-        this.attack = 2;
         this.hasSword = false;
-        this.healthMax = 12;
-        this.health = 12;
+        this.attack = 2;
+        this.healthMax = 20;
+        this.health = 20;
     }
 
 
@@ -36,46 +34,61 @@ class Hero {
         }
     }
 
-  async findStartPosition() {
-        let attempts = 0;
-        while (attempts < 50) { 
-            if (this.isMazeReady()) {
-                break;
-            }
-            await new Promise(resolve => setTimeout(resolve, 100));
-            attempts++;
+    async findStartPosition() {
+        let placed = false;
+        while (!placed) {
+            placed = this.placeSingleEntity('tileP');
+            await new Promise(resolve => setTimeout(resolve, 10));
         }
-
-        if (!this.maze || !this.maze.tiles) {
-            console.error('Maze or tiles is not initialized');
-            return false;
-        }
-
-        // Ищем первую свободную клетку для старта
-        for (let y = 0; y < this.maze.height; y++) {
-            if (!this.maze.tiles[y]) {
-                console.warn(`Row ${y} is undefined in maze tiles`);
-                continue;
-            }
-            
-            for (let x = 0; x < this.maze.width; x++) {
-                if (this.maze.tiles[y][x] === undefined) {
-                    console.warn(`Tile [${y}][${x}] is undefined`);
-                    continue;
-                }
-                
-                if (this.maze.tiles[y][x] === 0) {
-                    this.x = x;
-                    this.y = y;
-                    this.maze.tiles[y][x] = 'tilePwosw';
-                    console.log(`Hero placed at: ${x}, ${y}`);
-                    return true;
-                }
-            }
-        }
-        console.error('No free space found for hero');
-        return false;
     }
+
+    onEntityPlaced(x, y, entityType, extraData) {
+        if (entityType === 'tileP') {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+//   async findStartPosition() {
+//         let attempts = 0;
+//         while (attempts < 50) { 
+//             if (this.isMazeReady()) {
+//                 break;
+//             }
+//             await new Promise(resolve => setTimeout(resolve, 100));
+//             attempts++;
+//         }
+
+//         if (!this.maze || !this.maze.tiles) {
+//             console.error('Maze or tiles is not initialized');
+//             return false;
+//         }
+
+//         // Ищем первую свободную клетку для старта
+//         for (let y = 0; y < this.maze.height; y++) {
+//             if (!this.maze.tiles[y]) {
+//                 console.warn(`Row ${y} is undefined in maze tiles`);
+//                 continue;
+//             }
+            
+//             for (let x = 0; x < this.maze.width; x++) {
+//                 if (this.maze.tiles[y][x] === undefined) {
+//                     console.warn(`Tile [${y}][${x}] is undefined`);
+//                     continue;
+//                 }
+                
+//                 if (this.maze.tiles[y][x] === 0) {
+//                     this.x = x;
+//                     this.y = y;
+//                     this.maze.tiles[y][x] = 'tilePwosw';
+//                     console.log(`Hero placed at: ${x}, ${y}`);
+//                     return true;
+//                 }
+//             }
+//         }
+//         console.error('No free space found for hero');
+//         return false;
+//     }
 
     isMazeReady() {
         // Простая проверка - есть ли хотя бы одна свободная клетка

@@ -1,5 +1,3 @@
-// 'use strict';
-
 class Game {
     constructor() {
         this.field = document.getElementsByClassName('field')[0];
@@ -72,6 +70,7 @@ class Game {
     }
 
     async animateRooms() {
+        //  console.log('Animating rooms');
         for (const room of this.maze.rooms) {
             const {x, y, width, height} = room;
             
@@ -94,12 +93,11 @@ class Game {
     }
 
     async animateItems() {
-    console.log('Animating items...');
+    // console.log('Animating items');
     
     for (let y = 0; y < this.maze.height; y++) {
         for (let x = 0; x < this.maze.width; x++) {
             const tileType = this.maze.tiles[y][x];
-            // Проверяем предметы
             if (tileType === 'tileSW' || tileType === 'tileHP' || tileType === 'tileE' || tileType === "tilePwosw" || tileType === "tileP") {
                 const index = y * this.maze.width + x;
                 const tile = this.field.children[index];
@@ -114,7 +112,7 @@ class Game {
 }
 
     async animatePassages() {
-        console.log('Animating passages...');
+        // console.log('Animating passages');
         
         for (let y = 0; y < this.maze.height; y++) {
             for (let x = 0; x < this.maze.width; x++) {
@@ -230,6 +228,8 @@ class Game {
         this.enemyMoveInterval = setInterval(() => {
             if (!this.isPaused && this.enemies) {
                 this.enemies.moveEnemies('chase');
+                this.enemies.attackHero(this.hero);
+                if (this.hero.health <= 0) this.gameOver();
                 this.renderAllTiles();
             }
         }, 1000);
@@ -249,7 +249,7 @@ class Game {
         const savedState = localStorage.getItem('gameState');
         if (savedState) {
             const state = JSON.parse(savedState);
-            // Восстанавливаем состояние
+
             this.maze.tiles = state.maze;
             this.hero.x = state.hero.x;
             this.hero.y = state.hero.y;
@@ -260,12 +260,11 @@ class Game {
         return false;
     }
 
-    restoreItemsState(items){
+    // restoreItemsState(items){
 
-    }
+    // }
 
     handleAttack() {
-        // console.log('Атака пробелом! Сила:', this.hero.attack);
         let hitCount = 0;
         
         for (let dx = -1; dx <= 1; dx++) {
