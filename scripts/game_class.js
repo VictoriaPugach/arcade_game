@@ -1,17 +1,7 @@
-// 'use strict';
-
-// import { Maze } from './maze.js';
-// import { Hero } from './player.js';
-// import { Enemies } from './enemy.js';
-// import { Items } from './items.js';
-
 class Game {
     constructor() {
         this.field = document.getElementsByClassName('field')[0];
-        this.maze = new Maze(40, 24);
-        this.items = new Items(this.maze);
-        this.enemies = new Enemies(this.maze);
-        this.hero = new Hero(this.maze);
+        this.resetGame();
 
         this.isPaused = false;
         this.gameInterval = null;
@@ -19,6 +9,13 @@ class Game {
 
         this.setupControls();
         this.setupUI();
+    }
+
+    resetGame() {
+        this.maze = new Maze(40, 24);
+        this.items = new Items(this.maze);
+        this.enemies = new Enemies(this.maze);
+        this.hero = new Hero(this.maze);
     }
 
     setupUI(){
@@ -42,15 +39,16 @@ class Game {
                 case 'a': action = this.hero.moveLeft(); break;
                 case 's': action = this.hero.moveDown(); break;
                 case 'd': action = this.hero.moveRight(); break;
-                case ' ': action = this.handleAttack(); break; // Пробел для атаки
+                case ' ': 
+                event.preventDefault();
+                action = this.handleAttack(); 
+                break; 
             }
             
             if (action) {
-                // После движения или атаки враги атакуют героя
                 this.enemies.attackHero(this.hero);
                 this.renderAllTiles();
                 
-                // Проверяем смерть героя
                 if (this.hero.health <= 0) {
                     this.gameOver();
                 }
@@ -72,6 +70,7 @@ class Game {
     }
 
     async animateRooms() {
+        //  console.log('Animating rooms');
         for (const room of this.maze.rooms) {
             const {x, y, width, height} = room;
             
@@ -94,12 +93,11 @@ class Game {
     }
 
     async animateItems() {
-    console.log('Animating items...');
+    // console.log('Animating items');
     
     for (let y = 0; y < this.maze.height; y++) {
         for (let x = 0; x < this.maze.width; x++) {
             const tileType = this.maze.tiles[y][x];
-            // Проверяем предметы
             if (tileType === 'tileSW' || tileType === 'tileHP' || tileType === 'tileE' || tileType === "tilePwosw" || tileType === "tileP") {
                 const index = y * this.maze.width + x;
                 const tile = this.field.children[index];
@@ -114,7 +112,7 @@ class Game {
 }
 
     async animatePassages() {
-        console.log('Animating passages...');
+        // console.log('Animating passages');
         
         for (let y = 0; y < this.maze.height; y++) {
             for (let x = 0; x < this.maze.width; x++) {
@@ -134,6 +132,10 @@ class Game {
 
    renderAllTiles() {
     this.field.innerHTML = '';
+    this.field.style.display = 'grid';
+    this.field.style.gridTemplateColumns = `repeat(${this.maze.width}, 1fr)`;
+    this.field.style.gridTemplateRows = `repeat(${this.maze.height}, 1fr)`;
+    
     for (let y = 0; y < this.maze.height; y++) {
         for (let x = 0; x < this.maze.width; x++) {
             const tile = document.createElement('div');
@@ -146,11 +148,17 @@ class Game {
             } else {
                 tile.className = tileType;
                 
-                // ДОБАВЛЯЕМ health ВНУТРЬ плитки
+                // Добавляем индикатор здоровья ТОЛЬКО для персонажей
                 if (tileType === 'tileP' || tileType === 'tilePwosw') {
-                    tile.innerHTML = this.hero.getHealthHTML();
+                    const healthHTML = this.hero.getHealthHTML();
+                    tile.innerHTML = healthHTML;
                 } else if (tileType === 'tileE') {
-                    tile.innerHTML = this.enemies.getEnemyHealthHTML(x, y);
+                    // Для врагов проверяем, существует ли враг на этой позиции
+                    const enemy = this.enemies.enemies.find(e => e.x === x && e.y === y);
+                    if (enemy) {
+                        const healthHTML = this.enemies.getEnemyHealthHTML(x, y);
+                        tile.innerHTML = healthHTML;
+                    }
                 }
             }
             
@@ -165,34 +173,27 @@ class Game {
         this.isPaused = true;
         console.log('Game paused');
         
-        // Останавливаем интервалы
         if (this.gameInterval) clearInterval(this.gameInterval);
         if (this.enemyMoveInterval) clearInterval(this.enemyMoveInterval);
         
-        // Обновляем UI
         this.pauseBtn.style.display = 'none';
         this.resumeBtn.style.display = 'block';
         
-        // Сохраняем состояние игры (опционально)
         this.saveGameState();
     }
 
-    // Продолжение игры
     resumeGame() {
         if (!this.isPaused) return;
         
         this.isPaused = false;
         console.log('Game resumed');
         
-        // Запускаем интервалы снова
         this.startGameIntervals();
         
-        // Обновляем UI
         this.pauseBtn.style.display = 'block';
         this.resumeBtn.style.display = 'none';
     }
 
-    // Переключение паузы
     togglePause() {
         if (this.isPaused) {
             this.resumeGame();
@@ -201,44 +202,39 @@ class Game {
         }
     }
 
-    // Перезапуск игры
-    restartGame() {
-        // Очищаем все интервалы
+ restartGame() {
         if (this.gameInterval) clearInterval(this.gameInterval);
         if (this.enemyMoveInterval) clearInterval(this.enemyMoveInterval);
         
-        // Сбрасываем состояние
         this.isPaused = false;
+        localStorage.removeItem('gameState');
+        this.resetGame();
         
-        // Перезапускаем игру
         this.init().then(() => {
             console.log('Game restarted');
         });
     }
 
-    // Запуск игровых интервалов
     startGameIntervals() {
-        // Очищаем старые интервалы
         if (this.gameInterval) clearInterval(this.gameInterval);
         if (this.enemyMoveInterval) clearInterval(this.enemyMoveInterval);
         
-        // Основной игровой цикл (если нужен)
         this.gameInterval = setInterval(() => {
             if (!this.isPaused) {
-                // Логика обновления игры
+                
             }
         }, 1000 / 60); // 60 FPS
         
-        // Движение врагов
         this.enemyMoveInterval = setInterval(() => {
             if (!this.isPaused && this.enemies) {
                 this.enemies.moveEnemies('chase');
+                this.enemies.attackHero(this.hero);
+                if (this.hero.health <= 0) this.gameOver();
                 this.renderAllTiles();
             }
         }, 1000);
     }
 
-    // Сохранение состояния игры (опционально)
     saveGameState() {
         const gameState = {
             maze: this.maze.tiles,
@@ -249,27 +245,28 @@ class Game {
         localStorage.setItem('gameState', JSON.stringify(gameState));
     }
 
-    // Загрузка состояния игры (опционально)
     loadGameState() {
         const savedState = localStorage.getItem('gameState');
         if (savedState) {
             const state = JSON.parse(savedState);
-            // Восстанавливаем состояние
+
             this.maze.tiles = state.maze;
             this.hero.x = state.hero.x;
             this.hero.y = state.hero.y;
             this.enemies.enemies = state.enemies;
-            // this.restoreItemsState(state.items); // нужно реализовать
+            this.restoreItemsState(state.items); // нужно реализовать
             return true;
         }
         return false;
     }
 
+    // restoreItemsState(items){
+
+    // }
+
     handleAttack() {
-        console.log('Атака пробелом! Сила:', this.hero.attack);
         let hitCount = 0;
         
-        // Наносим урон всем соседним врагам
         for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
                 if (dx === 0 && dy === 0) continue;
@@ -303,36 +300,31 @@ class Game {
 
     async init() {
         try {
-            // Пытаемся загрузить сохраненное состояние
-            if (this.loadGameState()) {
-                console.log('Game state loaded from storage');
-            } else {
-                // Инициализируем новую игру
-                this.maze.init();
-                this.maze.generateRooms();
-                this.maze.generatePassages(); 
-                this.items.placeItems();
-                this.enemies.placeItems();
-                
-                this.renderFullWall();
-                await new Promise(resolve => setTimeout(resolve, 500));
-                await this.animateRooms();
-                await new Promise(resolve => setTimeout(resolve, 300));
-                this.animatePassages(); 
-                await new Promise(resolve => setTimeout(resolve, 300));
-                await this.animateItems();
+            this.maze.init();
+            this.maze.generateRooms();
+            this.maze.generatePassages(); 
+            this.items.placeItems();
+            this.enemies.placeItems();
+            
+            this.renderFullWall();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await this.animateRooms();
+            await new Promise(resolve => setTimeout(resolve, 300));
+            this.animatePassages(); 
+            await new Promise(resolve => setTimeout(resolve, 300));
+            await this.animateItems();
 
-                await this.hero.findStartPosition();
-                this.hero.placeItems();
-            }
+            await this.hero.findStartPosition();
+            this.hero.placeItems();
 
             this.enemies.setHero(this.hero);
             this.startGameIntervals();
             
-            console.log('Game initialized!');
+            console.log('New game initialized');
             
         } catch (error) {
             console.error('Error:', error);
         }
+
     }
 }

@@ -10,74 +10,15 @@
 		<link href="https://fonts.googleapis.com/css?family=Playfair+Display:400,400i|Tinos:400,400i&amp;subset=cyrillic" rel="stylesheet">
 		<!-- <script type="text/javascript" src="/shared/3rdparty/jquery/jquery.js" language="javascript1.1"></script> -->
 		<link rel="stylesheet" href="style.css" />
-		 <!-- <style>
-			* { box-sizing: border-box; }
-body, html { height: 100%; }
-body { background-color: #000000; color: #ffffff; }
-h1 { font-family: "Playfair Display"; font-size: 30px; padding: 10px 0px; margin: 0px; }
-.field-box { border: 2px solid #d0d0d0; float: left; }
-.field { position: relative; width: 1024px; height: 640px; }
-.field .tile { position: relative; background-size: cover; background-image: url(images/tile-.png); z-index: 5; overflow: visible;}
-.field .tileW { background-size: cover; background-image: url(images/tile-W.png); }
-.field .tileE { background-size: cover; background-image: url(images/tile-E.png); z-index: 10; }
-.field .tileP { background-size: cover;background-image: url(images/tile-P.png); z-index: 10; }
-.field .tilePwosw {background-size: cover;background-image: url(images/tile-P-wosw.png); z-index: 10; }
-.field .tileHP {  background-size: cover; background-image: url(images/tile-HP.png); z-index: 9; }
-.field .tileSW {background-size: cover; background-image: url(images/tile-SW.png); z-index: 9; }
-
-
-.field .tile .health {
-    background-color: #ff0000;
-    z-index: 20;
-    position: absolute;
-    left: 0px;
-    top: -3px;
-    height: 3px;
-    width: 100%;
-}
-
-.field .tileP .health,
-.field .tilePwosw .health {
-    background-color: #00ff00;
-    height: 3px;
-}
-
-.field .tileE .health {
-    background-color: #ff0000;
-    height: 3px;
-}
-
-.inventory .tileSW {
-    width: 50px;
-    height: 50px;
-    background-size: cover;
-    background-image: url(images/tile-SW.png);
-    border: 1px solid #d0d0d0;
-    border-radius: 3px;
-}
-
-.inventory-box { border: 2px solid #d0d0d0; float: left; }
-.inventory { display: flex; 
-    position: relative; 
-    width: 105px; 
-    height: 50px; 
-    gap: 5px; 
-    align-items: center;
-    justify-content: flex-start;}
-.cl { clear: both; display: block; }
-
-.ui {height: 50px; gap: 20px; display: flex; }
-.btn-pause .btn-resume .btn-replay {font-family: "Playfair Display"; font-size: 20px; padding: 10px 0px; margin: 20px; height: 100px;}
-		 </style> -->
 	</head>
 	<body>
 		<h1 class="game-title">Игровое поле</h1>
 		<div class="field-box">
 			<div class="field">
-				<!-- <div class="tile"></div> -->
 			</div>
 		</div>
 		<div class="cl"></div>
+
 		<h1>Инвентарь</h1>
 		<div class="inventory-box">
 			<div class="inventory">
@@ -87,17 +28,18 @@ h1 { font-family: "Playfair Display"; font-size: 30px; padding: 10px 0px; margin
 		<div class="cl"></div>
 		<h1>Управление</h1>
 		<div class="ui">
-			<button class="btn-pause">Пауза</button>
-			<button class="btn-resume">Продолжить</button>
-			<button class="btn-replay">Перезапуск</button>
+			<button class="btn btn-pause">Пауза</button>
+			<button class="btn btn-resume" style="display:none;">Продолжить</button>
+			<button class="btn btn-replay">Перезапуск</button>
 		</div>
-		
+
 		<script src="scripts/utils.js"></script>
-		<script src="scripts/maze.js"></script>
-		<script src="scripts/player.js"></script>
-		<script src="scripts/enemy.js"></script>
+		<script src="scripts/i_entity.js"></script>
 		<script src="scripts/items.js"></script>
-		<script src="scripts/game_class.js"></script>
+		<script src="scripts/enemy.js"></script>
+		<script src="scripts/player.js"></script>
+		<script src="scripts/maze.js"></script>
+    	<script src="scripts/game_class.js"></script>
 		<script src="scripts/index.js"></script>
 	</body>
 </html>

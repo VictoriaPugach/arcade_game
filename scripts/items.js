@@ -1,13 +1,7 @@
-// import { getRandomInt } from './utils.js';
-
-class Items {
+class Items extends EntityPlacer {
     constructor(maze) {
-        this.maze = maze;
+        super(maze);
     }
-
-    // getRandomInt(min, max) {
-    //     return Math.floor(Math.random() * (max - min + 1)) + min;
-    // }
 
     placeItems() {
         this.placeSwords(2);
@@ -15,29 +9,13 @@ class Items {
     }
 
     placeSwords(count) {
-        for (let i = 0; i < count; i++) {
-            this.placeItem('tileSW');
-        }
+        this.placeEntity('tileSW', count);
     }
 
     placePotions(count) {
-        for (let i = 0; i < count; i++) {
-            this.placeItem('tileHP');
-        }
+        this.placeEntity('tileHP', count);
     }
 
-
-    placeItem(itemType) {
-        let attempts = 0;
-        while (attempts < 100) {
-            const x = getRandomInt(0, this.maze.width - 1);
-            const y = getRandomInt(0, this.maze.height - 1);
-        
-            if (this.maze.tiles[y][x] === 0) {
-                this.maze.tiles[y][x] = itemType; 
-                return;
-            }
-            attempts++;
-        }
+    onEntityPlaced(x, y, entityType, extraData) {
     }
 }

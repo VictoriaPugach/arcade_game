@@ -1,20 +1,14 @@
-// import { getRandomInt } from './utils.js';
-
-
-class Hero {
+class Hero extends EntityPlacer {
     constructor(maze) {
-        this.maze = maze;
+        super(maze);
         this.x = 0;
         this.y = 0;
-        this.attack = 2;
         this.hasSword = false;
-        this.healthMax = 12;
-        this.health = 12;
+        this.attack = 2;
+        this.healthMax = 20;
+        this.health = 20;
     }
 
-    // getRandomInt(min, max) {
-    //     return Math.floor(Math.random() * (max - min + 1)) + min;
-    // }
 
     placeItems() {
         // this.placeHero(1);
@@ -40,49 +34,22 @@ class Hero {
         }
     }
 
-  async findStartPosition() {
-        let attempts = 0;
-        while (attempts < 50) { 
-            if (this.isMazeReady()) {
-                break;
-            }
-            await new Promise(resolve => setTimeout(resolve, 100));
-            attempts++;
+    async findStartPosition() {
+        let placed = false;
+        while (!placed) {
+            placed = this.placeSingleEntity('tileP');
+            await new Promise(resolve => setTimeout(resolve, 10));
         }
+    }
 
-        if (!this.maze || !this.maze.tiles) {
-            console.error('Maze or tiles is not initialized');
-            return false;
+    onEntityPlaced(x, y, entityType, extraData) {
+        if (entityType === 'tileP') {
+            this.x = x;
+            this.y = y;
         }
-
-        // Ищем первую свободную клетку для старта
-        for (let y = 0; y < this.maze.height; y++) {
-            if (!this.maze.tiles[y]) {
-                console.warn(`Row ${y} is undefined in maze tiles`);
-                continue;
-            }
-            
-            for (let x = 0; x < this.maze.width; x++) {
-                if (this.maze.tiles[y][x] === undefined) {
-                    console.warn(`Tile [${y}][${x}] is undefined`);
-                    continue;
-                }
-                
-                if (this.maze.tiles[y][x] === 0) {
-                    this.x = x;
-                    this.y = y;
-                    this.maze.tiles[y][x] = 'tilePwosw';
-                    console.log(`Hero placed at: ${x}, ${y}`);
-                    return true;
-                }
-            }
-        }
-        console.error('No free space found for hero');
-        return false;
     }
 
     isMazeReady() {
-        // Простая проверка - есть ли хотя бы одна свободная клетка
         return this.maze && 
                this.maze.tiles && 
                this.maze.tiles.length > 0 &&
@@ -93,7 +60,6 @@ class Hero {
         let newX = this.x + dx;
         let newY = this.y + dy;
 
-        // Проверяем, можно ли переместиться (не стена и в пределах карты)
         if (newX >= 0 && newX < this.maze.width && 
             newY >= 0 && newY < this.maze.height &&
             this.maze.tiles[newY][newX] !== 1) {
@@ -101,17 +67,14 @@ class Hero {
             this.checkForSwordPickup(newX, newY);
             this.checkForHealthPotionPickup(newX, newY);
             
-            // Освобождаем старую позицию
             this.maze.tiles[this.y][this.x] = 0;
             
-            // Занимаем новую позицию
             this.x = newX;
             this.y = newY;
             this.maze.tiles[this.y][this.x] = this.hasSword ? 'tileP' : 'tilePwosw';            
             return true;
         }
         
-        // Если уперлись в границу карты И находимся в коридоре - телепортируемся
         if ((newX < 0 || newX >= this.maze.width || 
              newY < 0 || newY >= this.maze.height) && 
             this.isInPassage()) {
@@ -121,36 +84,31 @@ class Hero {
         return false;
     }
 
-     isInPassage() {
+    isInPassage() {
         return this.maze.tiles[this.y][this.x] === 0 || 
                this.maze.tiles[this.y][this.x] === 'tilePwosw' ||
                this.maze.tiles[this.y][this.x] === 'tileP';
     }
 
-      teleportToOppositeSide(dx, dy) {
+    teleportToOppositeSide(dx, dy) {
         let newX = this.x;
         let newY = this.y;
         
-        // Определяем направление телепортации
-        if (dx !== 0) { // Движение по горизонтали
+        if (dx !== 0) { 
             newX = dx > 0 ? 0 : this.maze.width - 1;
-        } else if (dy !== 0) { // Движение по вертикали
+        } else if (dy !== 0) {
             newY = dy > 0 ? 0 : this.maze.height - 1;
         }
         
-        // Проверяем, что целевая клетка - проход (не стена)
         if (this.maze.tiles[newY][newX] !== 1) {
-            // Освобождаем старую позицию
             this.maze.tiles[this.y][this.x] = 0;
             
-            // Телепортируемся
             this.x = newX;
             this.y = newY;
             this.maze.tiles[this.y][this.x] = this.hasSword ? 'tileP' : 'tilePwosw';
             
             return true;
         }
-        
         return false;
     }
 
@@ -158,18 +116,15 @@ class Hero {
         let x = startX;
         let y = startY;
         
-        // Двигаемся в обратном направлении до конца прохода
         while (true) {
             const nextX = x - dx;
             const nextY = y - dy;
             
-            // Проверяем, не вышли ли за границы
             if (nextX < 0 || nextX >= this.maze.width || 
                 nextY < 0 || nextY >= this.maze.height) {
                 break;
             }
             
-            // Проверяем, не стена ли
             if (this.maze.tiles[nextY][nextX] === 1) {
                 break;
             }
@@ -177,13 +132,12 @@ class Hero {
             x = nextX;
             y = nextY;
         }
-        
         return dx !== 0 ? x : y;
     }
 
     checkForSwordPickup(x, y) {
         if (this.maze.tiles[y][x] === 'tileSW') {
-            console.log('Меч подобран! Сила атаки увеличена.');
+            // console.log('Меч подобран! Сила атаки увеличена.');
             this.pickUpSword();
             this.maze.tiles[y][x] = 0;
 
@@ -192,21 +146,20 @@ class Hero {
         }
     }
 
-     addToInventory(itemType) {
+    addToInventory(itemType) {
         const inventory = document.querySelector('.inventory');
         if (inventory) {
             const item = document.createElement('div');
             item.className = itemType;
             inventory.appendChild(item);
-            console.log('Предмет добавлен в инвентарь:', itemType);
+            // console.log('Предмет добавлен в инвентарь:', itemType);
         }
     }
 
     pickUpSword() {
         this.hasSword = true;
-        this.attackPower = 4; // Увеличиваем силу атаки
+        this.attackPower = 6; 
         
-        // Меняем внешний вид персонажа
         if (this.maze.tiles[this.y][this.x] === 'tilePwosw') {
             this.maze.tiles[this.y][this.x] = 'tileP';
         }
@@ -215,9 +168,9 @@ class Hero {
 
     checkForHealthPotionPickup(x, y) {
         if (this.maze.tiles[y][x] === 'tileHP') {
-            console.log('Подобрано зелье здоровья!');
-            this.heal(2); // Восстанавливаем 2 здоровья
-            this.maze.tiles[y][x] = 0; // Убираем зелье с карты
+            // console.log('Подобрано зелье здоровья!');
+            this.heal(4); 
+            this.maze.tiles[y][x] = 0; 
             return true;
         }
         return false;
@@ -227,15 +180,14 @@ class Hero {
         const oldHealth = this.health;
         this.health = Math.min(this.healthMax, this.health + amount);
         const healed = this.health - oldHealth;
-        console.log(`Восстановлено ${healed} здоровья. Теперь: ${this.health}/${this.healthMax}`);
+        // console.log(`Восстановлено ${healed} здоровья. Теперь: ${this.health}/${this.healthMax}`);
         return healed;
     }
 
-     attack() {
-        console.log('Герой атакует! Сила:', this.attack);
+    attack() {
+        // console.log('Герой атакует! Сила:', this.attack);
         let attacked = false;
         
-        // Проверяем все 8 соседних клеток
         for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
                 if (dx === 0 && dy === 0) continue;
@@ -247,7 +199,7 @@ class Hero {
                     y >= 0 && y < this.maze.height &&
                     this.maze.tiles[y][x] === 'tileE') {
                     
-                    console.log(`Попал по врагу на ${x},${y}`);
+                    // console.log(`Попал по врагу на ${x},${y}`);
                     attacked = true;
                 }
             }
@@ -255,10 +207,9 @@ class Hero {
         return attacked;
     }
     
-    // Получение урона
     takeDamage(damage) {
         this.health = Math.max(0, this.health - damage);
-        console.log(`Герой получил ${damage} урона. Здоровье: ${this.health}`);
+        // console.log(`Герой получил ${damage} урона. Здоровье: ${this.health}`);
         return this.health > 0;
     }
     

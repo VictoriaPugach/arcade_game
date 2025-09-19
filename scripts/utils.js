@@ -13,6 +13,6 @@ function isIntersects(RectA, RectB) {
             RectA[1] < RectB[3]);
 }
 
-const FIELD_HEIGHT = 40;
-const FIELD_WIDTH = 24;
-const TILE_HEIGHT = 3; 
+// const FIELD_HEIGHT = 40;
+// const FIELD_WIDTH = 24;
+// const TILE_HEIGHT = 3; 
