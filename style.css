@@ -29,6 +29,18 @@ h1 { font-family: "Playfair Display"; font-size: 30px; padding: 10px 0px; margin
     height: 3px;
 }
 
+.btn{
+    color: white;
+    background-color: #8f8f8f;
+    font-family: "Playfair Display";
+    border-radius: 5px;
+    font-size: 20px;
+}
+
+.btn:hover{
+     background-color: #767676;
+}
+
 .field .tileE .health {
     background-color: #ff0000;
     height: 3px;

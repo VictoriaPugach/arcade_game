@@ -1,3 +1,5 @@
+// 'use strict';
+
 class Hero {
     constructor(maze) {
         this.maze = maze;
@@ -9,9 +11,6 @@ class Hero {
         this.health = 12;
     }
 
-    getRandomInt(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
 
     placeItems() {
         // this.placeHero(1);
@@ -26,8 +25,8 @@ class Hero {
     placeItem(itemType) {
         let attempts = 0;
         while (attempts < 100) {
-            const x = this.getRandomInt(0, this.maze.width - 1);
-            const y = this.getRandomInt(0, this.maze.height - 1);
+            const x = getRandomInt(0, this.maze.width - 1);
+            const y = getRandomInt(0, this.maze.height - 1);
         
             if (this.maze.tiles[y][x] === 0) {
                 this.maze.tiles[y][x] = itemType; 

@@ -6,9 +6,6 @@
 // // 1) rand 5-10 rectangles 3-8 sides
 // 2) 3 - 5 horizontal and vertical lines 1 lines wide
 
-'use strict';
-
-// import getRandomInt from "../tools/utils.js";
 
 class Maze {
     constructor(width, height) {
@@ -16,10 +13,6 @@ class Maze {
         this.height = height || 24;
         this.tiles = [];
         this.rooms = [];
-    }
-
-    getRandomInt(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
     init() {
@@ -34,33 +27,26 @@ class Maze {
         this.rooms = [];
     }
 
-    isIntersects(RectA, RectB) {
-        return (RectA[0] < RectB[2] && 
-                RectA[2] > RectB[0] &&
-                RectA[3] > RectB[1] &&
-                RectA[1] < RectB[3]);
-    }
-
     generateRooms() {
         const rectMap = [];
         this.rooms = [];
-        const N = this.getRandomInt(5, 10);
+        const N = getRandomInt(5, 10);
 
         for (let n = 0; n < N; n++) {
-            const w = this.getRandomInt(3, 8);
-            const h = this.getRandomInt(3, 8);
+            const w = getRandomInt(3, 8);
+            const h = getRandomInt(3, 8);
             let placed = false; //TODO
             let attempts = 0; // TODO
 
             while (!placed && attempts < 100) {
                 attempts++;
-                const x1 = this.getRandomInt(1, this.width - w - 1);
-                const y1 = this.getRandomInt(1, this.height - h - 1);
+                const x1 = getRandomInt(1, this.width - w - 1);
+                const y1 = getRandomInt(1, this.height - h - 1);
                 const tempRect = [x1, y1, x1 + w, y1 + h];
 
                 let intersects = false;
                 for (const rect of rectMap) {
-                    if (this.isIntersects(tempRect, rect)) {
+                    if (isIntersects(tempRect, rect)) {
                         intersects = true;
                         break;
                     }
@@ -88,10 +74,10 @@ class Maze {
         const usedY = new Set();
     
         // Вертикальные проходы
-        for (let i = 0; i < this.getRandomInt(3, 5); i++) {
+        for (let i = 0; i < getRandomInt(3, 5); i++) {
             let x, attempts = 0;
             do {
-                x = this.getRandomInt(1, this.width - 2);
+                x = getRandomInt(1, this.width - 2);
             } while (attempts++ < 50 && (usedX.has(x-1) || usedX.has(x) || usedX.has(x+1)));
         
             usedX.add(x);
@@ -99,10 +85,10 @@ class Maze {
         }
 
         // Горизонтальные проходы  
-        for (let i = 0; i < this.getRandomInt(3, 5); i++) {
+        for (let i = 0; i < getRandomInt(3, 5); i++) {
             let y, attempts = 0;
             do {
-                y = this.getRandomInt(1, this.height - 2);
+                y = getRandomInt(1, this.height - 2);
             } while (attempts++ < 50 && (usedY.has(y-1) || usedY.has(y) || usedY.has(y+1)));
         
             usedY.add(y);
