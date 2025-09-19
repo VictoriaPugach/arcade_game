@@ -184,10 +184,18 @@ class Hero {
             this.pickUpSword();
             this.maze.tiles[y][x] = 0;
 
-            let inventory = document.getElementsByClassName('inventory')[0];
-            let tile = document.createElement('div');
-            tile.classList.add('tileSW');
-            inventory.appendChild(tile);
+            this.addToInventory('tileSW');
+            return true;
+        }
+    }
+
+     addToInventory(itemType) {
+        const inventory = document.querySelector('.inventory');
+        if (inventory) {
+            const item = document.createElement('div');
+            item.className = itemType;
+            inventory.appendChild(item);
+            console.log('Предмет добавлен в инвентарь:', itemType);
         }
     }
 
