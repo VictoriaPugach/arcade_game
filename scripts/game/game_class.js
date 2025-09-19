@@ -1,26 +1,5 @@
 'use strict';
 
-document.addEventListener('keydown', (event) => {
-    if (this.hero) {
-        switch(event.key) {
-            case 'ArrowLeft':
-                this.hero.moveLeft();
-                break;
-            case 'ArrowUp':
-                this.hero.moveUp();
-                break;
-            case 'ArrowDown':
-                this.hero.moveDown();
-                break;
-            case 'ArrowRight':
-                this.hero.moveRight();
-                break;
-        }
-        // Перерисовываем карту после движения
-        this.render();
-    }
-});
-
 class Game {
     constructor() {
         this.field = document.getElementsByClassName('field')[0];

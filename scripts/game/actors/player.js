@@ -34,9 +34,8 @@ class Hero {
     }
 
   async findStartPosition() {
-        // Ждем полной загрузки карты
         let attempts = 0;
-        while (attempts < 50) { // Максимум 5 секунд ожидания
+        while (attempts < 50) { 
             if (this.isMazeReady()) {
                 break;
             }
@@ -82,33 +81,97 @@ class Hero {
                this.maze.tiles.length > 0 &&
                this.maze.tiles[0].length > 0;
     }
-    
-move(dx, dy) {
-    console.log(`Attempting move from: ${this.x}, ${this.y}`);
-    
-    const newX = this.x + dx;
-    const newY = this.y + dy;
-    console.log(`Attempting to move to: ${newX}, ${newY}`);
 
-    // Проверяем, можно ли переместиться
-    if (newX >= 0 && newX < this.maze.width && 
-        newY >= 0 && newY < this.maze.height) {
-        
-        console.log(`Target tile value: ${this.maze.tiles[newY][newX]}`);
-        
-        if (this.maze.tiles[newY][newX] !== 1) {
-            // Движение возможно
+ move(dx, dy) {
+        let newX = this.x + dx;
+        let newY = this.y + dy;
+
+        // Проверяем, можно ли переместиться (не стена и в пределах карты)
+        if (newX >= 0 && newX < this.maze.width && 
+            newY >= 0 && newY < this.maze.height &&
+            this.maze.tiles[newY][newX] !== 1) {
+            
+            // Освобождаем старую позицию
             this.maze.tiles[this.y][this.x] = 0;
+            
+            // Занимаем новую позицию
             this.x = newX;
             this.y = newY;
             this.maze.tiles[this.y][this.x] = 'tilePwosw';
-            console.log(`Moved successfully to: ${this.x}, ${this.y}`);
+            
             return true;
         }
+        
+        // Если уперлись в границу - проверяем, находимся ли в коридоре
+        if (this.isInPassage()) {
+            return this.teleportToOppositeSide(dx, dy);
+        }
+        
+        return false;
     }
-    console.log('Move blocked');
-    return false;
-}
+
+    // Проверяем, находится ли герой в коридоре
+    isInPassage() {
+        // Коридор - это клетка со значением 0 (проход)
+        return this.maze.tiles[this.y][this.x] === 0 || 
+               this.maze.tiles[this.y][this.x] === 'tilePwosw';
+    }
+
+    // Телепортация на противоположную сторону прохода
+    teleportToOppositeSide(dx, dy) {
+        let newX = this.x;
+        let newY = this.y;
+        
+        // Ищем противоположный конец прохода
+        if (dx !== 0) { // Движение по горизонтали
+            newX = this.findPassageEnd(this.x, this.y, dx, 0);
+        } else if (dy !== 0) { // Движение по вертикали
+            newY = this.findPassageEnd(this.x, this.y, 0, dy);
+        }
+        
+        // Если нашли валидную позицию для телепортации
+        if (newX !== this.x || newY !== this.y) {
+            // Освобождаем старую позицию
+            this.maze.tiles[this.y][this.x] = 0;
+            
+            // Телепортируемся
+            this.x = newX;
+            this.y = newY;
+            this.maze.tiles[this.y][this.x] = 'tilePwosw';
+            
+            return true;
+        }
+        
+        return false;
+    }
+
+    // Ищем конец прохода в заданном направлении
+    findPassageEnd(startX, startY, dx, dy) {
+        let x = startX;
+        let y = startY;
+        
+        // Двигаемся в обратном направлении до конца прохода
+        while (true) {
+            const nextX = x - dx;
+            const nextY = y - dy;
+            
+            // Проверяем, не вышли ли за границы
+            if (nextX < 0 || nextX >= this.maze.width || 
+                nextY < 0 || nextY >= this.maze.height) {
+                break;
+            }
+            
+            // Проверяем, не стена ли
+            if (this.maze.tiles[nextY][nextX] === 1) {
+                break;
+            }
+            
+            x = nextX;
+            y = nextY;
+        }
+        
+        return dx !== 0 ? x : y;
+    }
 
     moveLeft() { return this.move(-1, 0); }
     moveUp() { return this.move(0, -1); }
