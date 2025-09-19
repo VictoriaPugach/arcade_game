@@ -24,6 +24,7 @@ class Items {
         }
     }
 
+
     placeItem(itemType) {
         let attempts = 0;
         while (attempts < 100) {
