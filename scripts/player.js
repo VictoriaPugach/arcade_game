@@ -11,39 +11,38 @@ class Hero extends EntityPlacer {
 
 
     placeItems() {
-        // this.placeHero(1);
     }
 
-    placeHero(count) {
-        for (let i = 0; i < count; i++) {
-            this.placeItem('tilePwosw');
-        }
-    }
+    // placeHero(count) {
+    //     for (let i = 0; i < count; i++) {
+    //         this.placeItem('tilePwosw');
+    //     }
+    // }
 
-    placeItem(itemType) {
-        let attempts = 0;
-        while (attempts < 100) {
-            const x = getRandomInt(0, this.maze.width - 1);
-            const y = getRandomInt(0, this.maze.height - 1);
+    // placeItem(itemType) {
+    //     let attempts = 0;
+    //     while (attempts < 100) {
+    //         const x = getRandomInt(0, this.maze.width - 1);
+    //         const y = getRandomInt(0, this.maze.height - 1);
         
-            if (this.maze.tiles[y][x] === 0) {
-                this.maze.tiles[y][x] = itemType; 
-                return;
-            }
-            attempts++;
-        }
-    }
+    //         if (this.maze.tiles[y][x] === 0) {
+    //             this.maze.tiles[y][x] = itemType; 
+    //             return;
+    //         }
+    //         attempts++;
+    //     }
+    // }
 
     async findStartPosition() {
         let placed = false;
         while (!placed) {
-            placed = this.placeSingleEntity('tileP');
+            placed = this.placeSingleEntity('tilePwosw');
             await new Promise(resolve => setTimeout(resolve, 10));
         }
     }
 
     onEntityPlaced(x, y, entityType, extraData) {
-        if (entityType === 'tileP') {
+        if (entityType === 'tilePwosw') {
             this.x = x;
             this.y = y;
         }
