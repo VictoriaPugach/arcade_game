@@ -96,6 +96,7 @@ class Hero {
             this.maze.tiles[newY][newX] !== 1) {
 
             this.checkForSwordPickup(newX, newY);
+            this.checkForHealthPotionPickup(newX, newY);
             
             // Освобождаем старую позицию
             this.maze.tiles[this.y][this.x] = 0;
@@ -199,6 +200,24 @@ class Hero {
             this.maze.tiles[this.y][this.x] = 'tileP';
         }
         
+    }
+
+    checkForHealthPotionPickup(x, y) {
+        if (this.maze.tiles[y][x] === 'tileHP') {
+            console.log('Подобрано зелье здоровья!');
+            this.heal(2); // Восстанавливаем 2 здоровья
+            this.maze.tiles[y][x] = 0; // Убираем зелье с карты
+            return true;
+        }
+        return false;
+    }
+    
+    heal(amount) {
+        const oldHealth = this.health;
+        this.health = Math.min(this.healthMax, this.health + amount);
+        const healed = this.health - oldHealth;
+        console.log(`Восстановлено ${healed} здоровья. Теперь: ${this.health}/${this.healthMax}`);
+        return healed;
     }
 
      attack() {
