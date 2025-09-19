@@ -29,7 +29,22 @@ class Game {
         this.enemies = new Enemies(this.maze);
         this.hero = new Hero(this.maze);
 
+        this.isPaused = false;
+        this.gameInterval = null;
+        this.enemyMoveInterval = null;
+
         this.setupControls();
+        this.setupUI();
+    }
+
+    setupUI(){
+        this.pauseBtn = document.getElementsByClassName('btn-pause')[0];
+        this.resumeBtn = document.getElementsByClassName('btn-resume')[0];
+        this.restartBtn = document.getElementsByClassName('btn-replay')[0];
+        
+        this.pauseBtn.addEventListener('click', () => this.pauseGame());
+        this.resumeBtn.addEventListener('click', () => this.resumeGame());
+        this.restartBtn.addEventListener('click', () => this.restartGame());
     }
 
     setupControls() {
@@ -138,26 +153,141 @@ class Game {
         }
     }
 
+     pauseGame() {
+        if (this.isPaused) return;
+        
+        this.isPaused = true;
+        console.log('Game paused');
+        
+        // Останавливаем интервалы
+        if (this.gameInterval) clearInterval(this.gameInterval);
+        if (this.enemyMoveInterval) clearInterval(this.enemyMoveInterval);
+        
+        // Обновляем UI
+        this.pauseBtn.style.display = 'none';
+        this.resumeBtn.style.display = 'block';
+        
+        // Сохраняем состояние игры (опционально)
+        this.saveGameState();
+    }
+
+    // Продолжение игры
+    resumeGame() {
+        if (!this.isPaused) return;
+        
+        this.isPaused = false;
+        console.log('Game resumed');
+        
+        // Запускаем интервалы снова
+        this.startGameIntervals();
+        
+        // Обновляем UI
+        this.pauseBtn.style.display = 'block';
+        this.resumeBtn.style.display = 'none';
+    }
+
+    // Переключение паузы
+    togglePause() {
+        if (this.isPaused) {
+            this.resumeGame();
+        } else {
+            this.pauseGame();
+        }
+    }
+
+    // Перезапуск игры
+    restartGame() {
+        // Очищаем все интервалы
+        if (this.gameInterval) clearInterval(this.gameInterval);
+        if (this.enemyMoveInterval) clearInterval(this.enemyMoveInterval);
+        
+        // Сбрасываем состояние
+        this.isPaused = false;
+        
+        // Перезапускаем игру
+        this.init().then(() => {
+            console.log('Game restarted');
+        });
+    }
+
+    // Запуск игровых интервалов
+    startGameIntervals() {
+        // Очищаем старые интервалы
+        if (this.gameInterval) clearInterval(this.gameInterval);
+        if (this.enemyMoveInterval) clearInterval(this.enemyMoveInterval);
+        
+        // Основной игровой цикл (если нужен)
+        this.gameInterval = setInterval(() => {
+            if (!this.isPaused) {
+                // Логика обновления игры
+            }
+        }, 1000 / 60); // 60 FPS
+        
+        // Движение врагов
+        this.enemyMoveInterval = setInterval(() => {
+            if (!this.isPaused && this.enemies) {
+                this.enemies.moveEnemies('chase');
+                this.renderAllTiles();
+            }
+        }, 1000);
+    }
+
+    // Сохранение состояния игры (опционально)
+    saveGameState() {
+        const gameState = {
+            maze: this.maze.tiles,
+            hero: { x: this.hero.x, y: this.hero.y },
+            enemies: this.enemies.enemies,
+            items: this.getItemsState() // нужно реализовать
+        };
+        localStorage.setItem('gameState', JSON.stringify(gameState));
+    }
+
+    // Загрузка состояния игры (опционально)
+    loadGameState() {
+        const savedState = localStorage.getItem('gameState');
+        if (savedState) {
+            const state = JSON.parse(savedState);
+            // Восстанавливаем состояние
+            this.maze.tiles = state.maze;
+            this.hero.x = state.hero.x;
+            this.hero.y = state.hero.y;
+            this.enemies.enemies = state.enemies;
+            // this.restoreItemsState(state.items); // нужно реализовать
+            return true;
+        }
+        return false;
+    }
+
 
     async init() {
         try {
-            this.maze.init();
-            this.maze.generateRooms();
-            this.maze.generatePassages(); 
-            this.items.placeItems();
-            this.enemies.placeItems();
+            // Пытаемся загрузить сохраненное состояние
+            if (this.loadGameState()) {
+                console.log('Game state loaded from storage');
+            } else {
+                // Инициализируем новую игру
+                this.maze.init();
+                this.maze.generateRooms();
+                this.maze.generatePassages(); 
+                this.items.placeItems();
+                this.enemies.placeItems();
+                
+                this.renderFullWall();
+                await new Promise(resolve => setTimeout(resolve, 500));
+                await this.animateRooms();
+                await new Promise(resolve => setTimeout(resolve, 300));
+                this.animatePassages(); 
+                await new Promise(resolve => setTimeout(resolve, 300));
+                await this.animateItems();
 
-            this.renderFullWall();
-            await new Promise(resolve => setTimeout(resolve, 500));
-            await this.animateRooms();
-            await new Promise(resolve => setTimeout(resolve, 300));
-            this.animatePassages(); 
-            await new Promise(resolve => setTimeout(resolve, 300));
-            await this.animateItems();
+                await this.hero.findStartPosition();
+                this.hero.placeItems();
+            }
 
-            await this.hero.findStartPosition();
-            this.hero.placeItems();
-
+            this.enemies.setHero(this.hero);
+            this.startGameIntervals();
+            
             console.log('Game initialized!');
             
         } catch (error) {

@@ -17,4 +17,7 @@ h1 { font-family: "Playfair Display"; font-size: 30px; padding: 10px 0px; margin
 .inventory { position: relative; width: 800px; height: 32px; }
 .cl { clear: both; display: block; }
 
+.ui {height: 50px; gap: 20px; display: flex; }
+.btn-pause .btn-resume .btn-replay {font-family: "Playfair Display"; font-size: 20px; padding: 10px 0px; margin: 20px; height: 100px;}
+
 
