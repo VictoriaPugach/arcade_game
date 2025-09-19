@@ -3,6 +3,10 @@ class Hero {
         this.maze = maze;
         this.x = 0;
         this.y = 0;
+        this.attack = 2;
+        this.hasSword = false;
+        this.healthMax = 12;
+        this.health = 12;
     }
 
     getRandomInt(min, max) {
@@ -82,7 +86,7 @@ class Hero {
                this.maze.tiles[0].length > 0;
     }
 
- move(dx, dy) {
+    move(dx, dy) {
         let newX = this.x + dx;
         let newY = this.y + dy;
 
@@ -90,6 +94,8 @@ class Hero {
         if (newX >= 0 && newX < this.maze.width && 
             newY >= 0 && newY < this.maze.height &&
             this.maze.tiles[newY][newX] !== 1) {
+
+            this.checkForSwordPickup(newX, newY);
             
             // Освобождаем старую позицию
             this.maze.tiles[this.y][this.x] = 0;
@@ -97,47 +103,47 @@ class Hero {
             // Занимаем новую позицию
             this.x = newX;
             this.y = newY;
-            this.maze.tiles[this.y][this.x] = 'tilePwosw';
-            
+            this.maze.tiles[this.y][this.x] = this.hasSword ? 'tileP' : 'tilePwosw';            
             return true;
         }
         
-        // Если уперлись в границу - проверяем, находимся ли в коридоре
-        if (this.isInPassage()) {
+        // Если уперлись в границу карты И находимся в коридоре - телепортируемся
+        if ((newX < 0 || newX >= this.maze.width || 
+             newY < 0 || newY >= this.maze.height) && 
+            this.isInPassage()) {
             return this.teleportToOppositeSide(dx, dy);
         }
         
         return false;
     }
 
-    // Проверяем, находится ли герой в коридоре
-    isInPassage() {
-        // Коридор - это клетка со значением 0 (проход)
+     isInPassage() {
         return this.maze.tiles[this.y][this.x] === 0 || 
-               this.maze.tiles[this.y][this.x] === 'tilePwosw';
+               this.maze.tiles[this.y][this.x] === 'tilePwosw' ||
+               this.maze.tiles[this.y][this.x] === 'tileP';
     }
 
     // Телепортация на противоположную сторону прохода
-    teleportToOppositeSide(dx, dy) {
+      teleportToOppositeSide(dx, dy) {
         let newX = this.x;
         let newY = this.y;
         
-        // Ищем противоположный конец прохода
+        // Определяем направление телепортации
         if (dx !== 0) { // Движение по горизонтали
-            newX = this.findPassageEnd(this.x, this.y, dx, 0);
+            newX = dx > 0 ? 0 : this.maze.width - 1;
         } else if (dy !== 0) { // Движение по вертикали
-            newY = this.findPassageEnd(this.x, this.y, 0, dy);
+            newY = dy > 0 ? 0 : this.maze.height - 1;
         }
         
-        // Если нашли валидную позицию для телепортации
-        if (newX !== this.x || newY !== this.y) {
+        // Проверяем, что целевая клетка - проход (не стена)
+        if (this.maze.tiles[newY][newX] !== 1) {
             // Освобождаем старую позицию
             this.maze.tiles[this.y][this.x] = 0;
             
             // Телепортируемся
             this.x = newX;
             this.y = newY;
-            this.maze.tiles[this.y][this.x] = 'tilePwosw';
+            this.maze.tiles[this.y][this.x] = this.hasSword ? 'tileP' : 'tilePwosw';
             
             return true;
         }
@@ -171,6 +177,27 @@ class Hero {
         }
         
         return dx !== 0 ? x : y;
+    }
+
+      // Проверка подбора меча
+    checkForSwordPickup(x, y) {
+        if (this.maze.tiles[y][x] === 'tileSW') {
+            console.log('Меч подобран! Сила атаки увеличена.');
+            this.pickUpSword();
+            this.maze.tiles[y][x] = 0;
+        }
+    }
+
+    // Подбор меча
+    pickUpSword() {
+        this.hasSword = true;
+        this.attackPower = 4; // Увеличиваем силу атаки
+        
+        // Меняем внешний вид персонажа
+        if (this.maze.tiles[this.y][this.x] === 'tilePwosw') {
+            this.maze.tiles[this.y][this.x] = 'tileP';
+        }
+        
     }
 
     moveLeft() { return this.move(-1, 0); }

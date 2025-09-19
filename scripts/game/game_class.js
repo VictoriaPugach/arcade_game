@@ -35,6 +35,7 @@ class Game {
                 case 'd': this.hero.moveRight(); break;
             }
             this.renderAllTiles(); // перерисовываем карту после движения
+            this.updateStatusDisplay(); // Обновляем отображение статуса
         });
     }
 

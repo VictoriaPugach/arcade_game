@@ -2,8 +2,7 @@ class Enemies {
     constructor(maze) {
         this.maze = maze;
         this.hero = null;
-        // this.render = renderCallback;
-        this.enemies = []; // Массив для хранения позиций врагов
+        this.enemies = []; 
     }
 
     setHero(hero) {
@@ -32,7 +31,13 @@ class Enemies {
         
             if (this.maze.tiles[y][x] === 0) {
                 this.maze.tiles[y][x] = itemType; 
-                this.enemies.push({x,y});
+                this.enemies.push({
+                    x, 
+                    y,
+                    health: 12,
+                    maxHealth: 12,
+                    attackPower: 2
+                });
                 return;
             }
             attempts++;
