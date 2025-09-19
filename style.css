@@ -18,7 +18,7 @@ h1 { font-family: "Playfair Display"; font-size: 30px; padding: 10px 0px; margin
     z-index: 20;
     position: absolute;
     left: 0px;
-    top: 0px;
+    top: -3px;
     height: 3px;
     width: 100%;
 }
@@ -26,10 +26,12 @@ h1 { font-family: "Playfair Display"; font-size: 30px; padding: 10px 0px; margin
 .field .tileP .health,
 .field .tilePwosw .health {
     background-color: #00ff00;
+    height: 3px;
 }
 
 .field .tileE .health {
     background-color: #ff0000;
+    height: 3px;
 }
 
 .inventory-box { border: 2px solid #d0d0d0; float: left; }
