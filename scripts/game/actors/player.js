@@ -123,7 +123,6 @@ class Hero {
                this.maze.tiles[this.y][this.x] === 'tileP';
     }
 
-    // Телепортация на противоположную сторону прохода
       teleportToOppositeSide(dx, dy) {
         let newX = this.x;
         let newY = this.y;
@@ -151,7 +150,6 @@ class Hero {
         return false;
     }
 
-    // Ищем конец прохода в заданном направлении
     findPassageEnd(startX, startY, dx, dy) {
         let x = startX;
         let y = startY;
@@ -179,7 +177,6 @@ class Hero {
         return dx !== 0 ? x : y;
     }
 
-      // Проверка подбора меча
     checkForSwordPickup(x, y) {
         if (this.maze.tiles[y][x] === 'tileSW') {
             console.log('Меч подобран! Сила атаки увеличена.');
@@ -193,7 +190,6 @@ class Hero {
         }
     }
 
-    // Подбор меча
     pickUpSword() {
         this.hasSword = true;
         this.attackPower = 4; // Увеличиваем силу атаки
@@ -203,6 +199,42 @@ class Hero {
             this.maze.tiles[this.y][this.x] = 'tileP';
         }
         
+    }
+
+     attack() {
+        console.log('Герой атакует! Сила:', this.attack);
+        let attacked = false;
+        
+        // Проверяем все 8 соседних клеток
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                if (dx === 0 && dy === 0) continue;
+                
+                const x = this.x + dx;
+                const y = this.y + dy;
+                
+                if (x >= 0 && x < this.maze.width && 
+                    y >= 0 && y < this.maze.height &&
+                    this.maze.tiles[y][x] === 'tileE') {
+                    
+                    console.log(`Попал по врагу на ${x},${y}`);
+                    attacked = true;
+                }
+            }
+        }
+        return attacked;
+    }
+    
+    // Получение урона
+    takeDamage(damage) {
+        this.health = Math.max(0, this.health - damage);
+        console.log(`Герой получил ${damage} урона. Здоровье: ${this.health}`);
+        return this.health > 0;
+    }
+    
+    getHealthHTML() {
+        const percent = (this.health / this.healthMax) * 100;
+        return `<div class="health" style="width: ${percent}%"></div>`;
     }
 
     moveLeft() { return this.move(-1, 0); }

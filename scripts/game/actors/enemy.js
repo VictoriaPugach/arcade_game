@@ -123,16 +123,6 @@ class Enemies {
             enemy.y = newY;
             this.maze.tiles[newY][newX] = 'tileE';
 
-            // Проверяем столкновение с героем
-            this.checkHeroCollision(enemy);
-        }
-    }
-
-    // Проверка столкновения с героем
-    checkHeroCollision(enemy) {
-        if (this.hero && enemy.x === this.hero.x && enemy.y === this.hero.y) {
-            console.log('Hero caught by enemy!');
-            // Здесь можно добавить логику поражения героя
         }
     }
 
@@ -156,5 +146,49 @@ class Enemies {
         if (this.render && typeof this.render === 'function') {
             this.render();
         }
+    }
+
+    // Нанесение урона врагу
+    takeDamage(x, y, damage) {
+        const enemyIndex = this.enemies.findIndex(e => e.x === x && e.y === y);
+        if (enemyIndex !== -1) {
+            this.enemies[enemyIndex].health -= damage;
+            console.log(`Враг получил ${damage} урона. Осталось здоровья: ${this.enemies[enemyIndex].health}`);
+            
+            if (this.enemies[enemyIndex].health <= 0) {
+                console.log('Враг убит!');
+                this.maze.tiles[y][x] = 0; // Убираем врага с карты
+                this.enemies.splice(enemyIndex, 1);
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    // Атака героя всеми соседними врагами
+    attackHero(hero) {
+        let attacked = false;
+        
+        this.enemies.forEach(enemy => {
+            const distX = Math.abs(enemy.x - hero.x);
+            const distY = Math.abs(enemy.y - hero.y);
+            
+            if (distX <= 1 && distY <= 1) {
+                console.log('Враг атакует героя!');
+                hero.takeDamage(2);
+                attacked = true;
+            }
+        });
+        
+        return attacked;
+    }
+    
+    getEnemyHealthHTML(x, y) {
+        const enemy = this.enemies.find(e => e.x === x && e.y === y);
+        if (enemy) {
+            const percent = (enemy.health / 12) * 100;
+            return `<div class="health" style="width: ${percent}%"></div>`;
+        }
+        return '';
     }
 }

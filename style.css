@@ -4,20 +4,37 @@ body { background-color: #000000; color: #ffffff; }
 h1 { font-family: "Playfair Display"; font-size: 30px; padding: 10px 0px; margin: 0px; }
 .field-box { border: 2px solid #d0d0d0; float: left; }
 .field { position: relative; width: 1024px; height: 640px; }
-.field .tile { background-size: cover; background-image: url(images/tile-.png); z-index: 5; }
+.field .tile { position: relative; background-size: cover; background-image: url(images/tile-.png); z-index: 5; overflow: visible;}
 .field .tileW { background-size: cover; background-image: url(images/tile-W.png); }
 .field .tileE { background-size: cover; background-image: url(images/tile-E.png); z-index: 10; }
 .field .tileP { background-size: cover;background-image: url(images/tile-P.png); z-index: 10; }
 .field .tilePwosw {background-size: cover;background-image: url(images/tile-P-wosw.png); z-index: 10; }
 .field .tileHP {  background-size: cover; background-image: url(images/tile-HP.png); z-index: 9; }
 .field .tileSW {background-size: cover; background-image: url(images/tile-SW.png); z-index: 9; }
-.field .tile .health { background-size: cover;background-color: #ff0000; z-index: 11; position: absolute; left: 0px; top: 0px; height: 3px; }
-.field .tileP .tilePwosw  .health { background-color: #00ff00; z-index: 11; position: absolute; left: 0px; top: 0px; height: 3px; }
+
+
+.field .tile .health {
+    background-color: #ff0000;
+    z-index: 20;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    height: 3px;
+    width: 100%;
+}
+
+.field .tileP .health,
+.field .tilePwosw .health {
+    background-color: #00ff00;
+}
+
+.field .tileE .health {
+    background-color: #ff0000;
+}
+
 .inventory-box { border: 2px solid #d0d0d0; float: left; }
 .inventory { display: flex; position: relative; width: 100px; height: 50px; gap: 5px;}
 .cl { clear: both; display: block; }
 
 .ui {height: 50px; gap: 20px; display: flex; }
 .btn-pause .btn-resume .btn-replay {font-family: "Playfair Display"; font-size: 20px; padding: 10px 0px; margin: 20px; height: 100px;}
-
-

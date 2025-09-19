@@ -26,16 +26,30 @@ class Game {
         this.restartBtn.addEventListener('click', () => this.restartGame());
     }
 
-    setupControls() {
+ setupControls() {
         document.addEventListener('keydown', (event) => {
+            if (this.isPaused) return;
+            
+            let action = false;
+            
             switch(event.key.toLowerCase()) {
-                case 'w': this.hero.moveUp(); break;
-                case 'a': this.hero.moveLeft(); break;
-                case 's': this.hero.moveDown(); break;
-                case 'd': this.hero.moveRight(); break;
+                case 'w': action = this.hero.moveUp(); break;
+                case 'a': action = this.hero.moveLeft(); break;
+                case 's': action = this.hero.moveDown(); break;
+                case 'd': action = this.hero.moveRight(); break;
+                case ' ': action = this.handleAttack(); break; // Пробел для атаки
             }
-            this.renderAllTiles(); // перерисовываем карту после движения
-            this.updateStatusDisplay(); // Обновляем отображение статуса
+            
+            if (action) {
+                // После движения или атаки враги атакуют героя
+                this.enemies.attackHero(this.hero);
+                this.renderAllTiles();
+                
+                // Проверяем смерть героя
+                if (this.hero.health <= 0) {
+                    this.gameOver();
+                }
+            }
         });
     }
 
@@ -113,25 +127,32 @@ class Game {
         }
     }
 
-        renderAllTiles() {
-        this.field.innerHTML = '';
-        for (let y = 0; y < this.maze.height; y++) {
-            for (let x = 0; x < this.maze.width; x++) {
-                const tile = document.createElement('div');
-                const tileType = this.maze.tiles[y][x];
+   renderAllTiles() {
+    this.field.innerHTML = '';
+    for (let y = 0; y < this.maze.height; y++) {
+        for (let x = 0; x < this.maze.width; x++) {
+            const tile = document.createElement('div');
+            const tileType = this.maze.tiles[y][x];
+            
+            if (tileType === 1) {
+                tile.className = 'tileW';
+            } else if (tileType === 0) {
+                tile.className = 'tile';
+            } else {
+                tile.className = tileType;
                 
-                if (tileType === 1) {
-                    tile.classList.add('tileW');
-                } else if (tileType === 0) {
-                    tile.classList.add('tile');
-                } else {
-                    tile.classList.add(tileType); // герой, предметы
+                // ДОБАВЛЯЕМ health ВНУТРЬ плитки
+                if (tileType === 'tileP' || tileType === 'tilePwosw') {
+                    tile.innerHTML = this.hero.getHealthHTML();
+                } else if (tileType === 'tileE') {
+                    tile.innerHTML = this.enemies.getEnemyHealthHTML(x, y);
                 }
-                
-                this.field.appendChild(tile);
             }
+            
+            this.field.appendChild(tile);
         }
     }
+}
 
      pauseGame() {
         if (this.isPaused) return;
@@ -237,6 +258,41 @@ class Game {
             return true;
         }
         return false;
+    }
+
+    handleAttack() {
+        console.log('Атака пробелом! Сила:', this.hero.attack);
+        let hitCount = 0;
+        
+        // Наносим урон всем соседним врагам
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                if (dx === 0 && dy === 0) continue;
+                
+                const x = this.hero.x + dx;
+                const y = this.hero.y + dy;
+                
+                if (x >= 0 && x < this.maze.width && 
+                    y >= 0 && y < this.maze.height &&
+                    this.maze.tiles[y][x] === 'tileE') {
+                    
+                    const killed = this.enemies.takeDamage(x, y, this.hero.attack);
+                    if (killed) hitCount++;
+                    console.log(`Атакован враг на ${x},${y}`);
+                }
+            }
+        }
+        
+        if (hitCount > 0) {
+            console.log(`Убито врагов: ${hitCount}`);
+            return true;
+        }
+        return false;
+    }
+    
+    gameOver() {
+        console.log('💀 Игра окончена!');
+        alert('GAME OVER - Вы погибли!');
     }
 
 
