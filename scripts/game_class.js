@@ -1,4 +1,9 @@
-'use strict';
+// 'use strict';
+
+// import { Maze } from './maze.js';
+// import { Hero } from './player.js';
+// import { Enemies } from './enemy.js';
+// import { Items } from './items.js';
 
 class Game {
     constructor() {
